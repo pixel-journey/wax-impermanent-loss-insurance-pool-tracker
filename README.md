@@ -1,145 +1,119 @@
 # wax-impermanent-loss-insurance-pool-tracker
 
-**Impermanent Loss Insurance Pool Tracker**
+**Trust label:** `educational-reference`  
+**Status:** Private. The full-range formula and the insurance overlay are tested offline.
 
-A dashboard that measures the real-world performance of hedge allocations and insurance strategies designed to offset impermanent loss for high-volume liquidity providers on WAX Alcor pools.
+One-sentence goal: show how a constant-product liquidity position compares with simply holding, and how a paper insurance policy changes that gap.
 
-**Status:** 🔒 Private (In Development) | Target: Public when v1 complete  
-**Category:** Advanced Compliance, Accounting Analytics & Financial Forensics  
-**Parent Catalog:** [pixel-journey/wax-ecosystem-blueprint-catalog](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog)
+Parent catalog: [pixel-journey/wax-ecosystem-blueprint-catalog](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog)
 
-> Built to the same high standard of educational excellence, production readiness, and WAX best practices as the [gkniftyheads-tracker](https://github.com/henrikpiga/gkniftyheads-tracker).
-
----
-
-## Quick Start
+## Quick start
 
 ```bash
 git clone https://github.com/pixel-journey/wax-impermanent-loss-insurance-pool-tracker.git
 cd wax-impermanent-loss-insurance-pool-tracker
 npm install
+npm test
 npm run dev
 ```
 
-Explore sample hedge/insurance strategies in the demo or connect a wallet to analyze real LP positions.
+The demo uses a 1,000 quote-unit position and fixture prices. It does not connect a wallet.
 
----
+## Why this exists
 
-## Why This Blueprint?
+“IL insurance” dashboards often mix a live pool chart with an unlabeled model. This repo separates them. The math you can recompute is here. Alcor history is not.
 
-Concentrated liquidity offers capital efficiency but can accelerate impermanent loss during volatile periods. Many LPs and protocols are exploring hedge or insurance strategies to mitigate this. This tool provides transparent, data-driven measurement of how well those strategies are actually performing against real historical pool data.
+This is **not financial advice**, not a quote, and not evidence that any WAX pool offers the policies in the dropdown.
 
----
+## Concepts
 
-## Architecture & Data Flow
+| Piece | Rule |
+| --- | --- |
+| Price ratio `k` | `priceNow / entryPrice` |
+| Full-range LP value | `entryValue * sqrt(k)` |
+| Hold value | `entryValue * (k + 1) / 2` |
+| IL fraction | `lp / hold - 1`, which is `2*sqrt(k)/(1+k) - 1` |
+| Shortfall | `max(0, hold - lp)` in quote units |
+| Policy | Premium, deductible, coverage, and payout cap, each a fraction of **entry** value |
 
+At `k = 4` and at `k = 1/4`, IL is −20% versus holding. A round trip back to `k = 1` returns IL to zero and does not refund the premium. Trading fees are not modeled, so a real pool can differ.
+
+## Patterns
+
+**Simple.** Call `impermanentLossFraction(k)` and show the percent.
+
+**Recommended.** Call `snapshot` with an explicit `InsurancePolicy`. The demo does this for three named policies.
+
+**Advanced.** Run `trackSeries` on your own price ticks. Keep ticks in the repo as fixtures until you have recorded Alcor responses in `VERIFICATION-LOG.md`.
+
+## Demo
+
+Pick a path (flat, 4×, quarter, round trip) and a policy. The table is the whole product. There is no chart library and no animation.
+
+## Integration
+
+```ts
+import { POLICIES, snapshot } from "./examples/il";
+
+const row = snapshot({
+  entryValueQuote: 1000,
+  entryPrice: 1,
+  priceNow: 4,
+  policy: POLICIES.deductible,
+});
 ```
-Select LP Position or Hedge Strategy
-       ↓
-Fetch Historical Pool Data & Price Series (Alcor + Hyperion)
-       ↓
-Simulate IL vs Hedge Performance
-  - Calculate actual IL experienced
-  - Apply hedge/insurance parameters
-  - Compare net outcome
-       ↓
-Interactive Dashboard
-  - Performance charts (IL vs hedged)
-  - Efficiency metrics
-  - Scenario comparison
-```
 
-All simulations and visualizations are client-side.
+Do not label `row.payoutQuote` as money a protocol will send you.
 
----
+## Best practices and anti-patterns
 
-## Complete Repository Structure
+Do:
 
-Follows Pixel Journey high standards.
+- Say “versus holding” when you show the −20% figure. It is not a loss versus the entry deposit.
+- Show the premium on the round trip, where IL itself is zero.
+- State that concentrated liquidity uses a different formula.
 
-Key parts:
-- `app/` — Main dashboard
-- `components/` — PerformanceChart, HedgeParameters, ComparisonTable, MetricCards
-- `hooks/` — useILSimulation, usePoolHistory
-- `lib/wax/` — il-calculator.ts, hedge-simulator.ts, alcor-history.ts
-- `public/mock-data/` — Sample LP positions and hedge strategies
-- `.github/workflows/` — CI automation
+Do not:
 
-Detailed comments on IL math and simulation methodology.
+- Feed this function an Alcor v2 tick range and call the result concentrated IL.
+- Draw a directional short as if it were symmetric insurance. A short helps one way and hurts the other; it is omitted on purpose.
+- Present fixture paths as backtests of WAX/PXJ or any other market.
+- Hide the payout cap. The deductible policy in this repo hits the cap at 4×.
 
----
+## Edge cases
 
-## Key WAX Concepts Explained
+| Input | Result |
+| --- | --- |
+| `k = 1` | IL is 0. Insured policies still charge premium |
+| `k = 4` and `k = 0.25` | Same IL fraction (−0.2), different quote values of hold and LP |
+| Coverage or premium outside 0..1 | Throw `IlInputError` |
+| Empty tick list | Throw |
+| Deductible larger than the shortfall | Payout is 0 |
 
-- **Impermanent Loss in Concentrated Liquidity**: How price movement outside ranges affects LP returns.
-- **Hedge/Insurance Strategies**: Common approaches (options, correlated assets, protocols) to offset IL.
-- **Historical Simulation**: Using real past pool data to backtest strategy effectiveness.
-- **Alcor Data**: Leveraging public pool state and swap history for accurate modeling.
+## Safety
 
-This is **WAX-specific** (Alcor v2) but the simulation and tracking patterns are portable to other concentrated liquidity AMMs.
+No wallet, no prices from the network. Copy on the page says the numbers are not a hedge quote. Not an axe audit. The table is text, so it is readable without color.
 
----
+## Antelope portability
 
-## Design Specifications
+The formula is AMM math, not a WAX endpoint. Alcor v2 ranges, fee tiers, and “insurance pools” on WAX are **not** implemented. The same functions apply to any constant-product pool on Antelope or elsewhere. They do not apply unchanged to concentrated liquidity.
 
-- Clean dashboard with clear performance visualization
-- Side-by-side comparison of unhedged vs hedged outcomes
-- Interactive parameters for testing different hedge strategies
-- Responsive and accessible design
-- Color-coded metrics for quick insight
+## Verification
 
-Aligned with Pixel Journey Design System.
+`examples/il.test.ts` locks the 4× identities, the payout cap, the round-trip premium, and input rejection. No Alcor response has been recorded.
 
----
+## Related
 
-## Technical Architecture & Best Practices
-
-- **Stack**: Next.js 15, TypeScript, Tailwind + shadcn/ui, Recharts or custom charts
-- **Data**: Alcor pool history + price series with efficient fetching and caching
-- **Performance**: Client-side simulations with React Query; optional Web Worker for heavy calculations
-- **Demo Mode**: Full interactive dashboard with realistic sample strategies
-
-See catalog standards for WAX rate limiting and public data best practices.
-
----
-
-## Demo & Usage
-
-- Explore pre-loaded hedge/insurance examples
-- Adjust parameters to simulate different strategies
-- Compare IL outcomes visually
-- View detailed performance metrics and break-even analysis
-- Export simulation results
-
-Designed for immediate practical value.
-
----
-
-## Customization
-
-- Add new hedge strategy models
-- Adjust simulation parameters and time windows
-- Integrate with other Alcor/DeFi tools in the catalog
-- Customize metrics and visualizations per project needs
-
----
+- `wax-lp-impermanent-loss-heat-map` — still a separate repo; do not assume it shares this code
+- `wax-alcor-v2-range-efficiency-backtester`
+- `wax-defi-protocol-health-dashboard`
 
 ## Roadmap
 
-- v1: Core IL vs hedge simulation + dashboard + demo
-- v1.1: Advanced scenario modeling and historical playback
-- Future: Integration with LP behavioral profiler and yield tools
+- One recorded Alcor pool state, cited in the verification log, before any “live” label
+- A concentrated-range function in its own module, with its own tests, not stuffed into this one
+- Still no trading advice
 
----
+## License
 
-## Contributing & Credits
-
-Built with care for better risk management tools on WAX.
-
-MIT License.
-
-Following the production-quality educational standards from the gkniftyheads-tracker.
-
----
-
-*Pixel Journey — Making Web3 interfaces pixel-perfect and delightful.*
+MIT.

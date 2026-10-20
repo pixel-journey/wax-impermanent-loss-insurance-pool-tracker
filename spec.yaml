@@ -1,0 +1,25 @@
+name: wax-impermanent-loss-insurance-pool-tracker
+trust_label: educational-reference
+version: 0.1.0
+purpose: >
+  Full-range constant-product impermanent loss versus an explicit insurance policy.
+invariants:
+  - impermanentLossFraction(1) is 0 and impermanentLossFraction(4) is -0.2.
+  - lpValue = entryValue * sqrt(k) and holdValue = entryValue * (k + 1) / 2.
+  - Payout cannot exceed payoutCapFraction * entryValue.
+  - Premium is charged even when IL is zero.
+  - No network calls in examples/il.ts.
+do_not:
+  - Do not describe results as financial advice or as Alcor v2 concentrated IL.
+  - Do not treat fixture paths as historical WAX prices.
+  - Do not add a directional short and call it symmetric insurance.
+entrypoints:
+  logic: examples/il.ts
+  tests: examples/il.test.ts
+  demo: examples/Demo.tsx
+commands:
+  test: npm test
+  demo: npm run dev
+live_data:
+  status: untested
+  notes: Alcor history is not fetched.
