@@ -8,15 +8,15 @@ invariants:
   - lpValue = entryValue * sqrt(k) and holdValue = entryValue * (k + 1) / 2.
   - Payout cannot exceed payoutCapFraction * entryValue.
   - Premium is charged even when IL is zero.
-  - No network calls in examples/il.ts.
+  - No network calls in src/il.ts.
 do_not:
   - Do not describe results as financial advice or as Alcor v2 concentrated IL.
   - Do not treat fixture paths as historical WAX prices.
   - Do not add a directional short and call it symmetric insurance.
 entrypoints:
-  logic: examples/il.ts
-  tests: examples/il.test.ts
-  demo: examples/Demo.tsx
+  logic: src/il.ts
+  tests: src/il.test.ts
+  demo: src/Demo.tsx
 commands:
   test: npm test
   demo: npm run dev

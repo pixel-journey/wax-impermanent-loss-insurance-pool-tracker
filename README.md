@@ -53,7 +53,7 @@ Pick a path (flat, 4×, quarter, round trip) and a policy. The table is the whol
 ## Integration
 
 ```ts
-import { POLICIES, snapshot } from "./examples/il";
+import { POLICIES, snapshot } from "./src/il";
 
 const row = snapshot({
   entryValueQuote: 1000,
@@ -100,7 +100,7 @@ The formula is AMM math, not a WAX endpoint. Alcor v2 ranges, fee tiers, and “
 
 ## Verification
 
-`examples/il.test.ts` locks the 4× identities, the payout cap, the round-trip premium, and input rejection. No Alcor response has been recorded.
+`src/il.test.ts` locks the 4× identities, the payout cap, the round-trip premium, and input rejection. No Alcor response has been recorded.
 
 ## Related
 
@@ -117,3 +117,10 @@ The formula is AMM math, not a WAX endpoint. Alcor v2 ranges, fee tiers, and “
 ## License
 
 MIT.
+
+
+## Queries and unsigned transactions
+
+`src/api.ts` builds the HTTP requests. `src/usecases.ts` is the worked case for this repo: those requests, and the unsigned transaction when the feature actually has an action. `executed` is false. Nothing is sent.
+
+The engines used to sit in `examples/`. GitHub treats that directory as documentation, so the language bar showed the stylesheet and almost none of the TypeScript.

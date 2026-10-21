@@ -10,7 +10,7 @@ Checked 2026-10-20. Stays private.
 
 ## Gate 1
 
-- [x] spec.yaml, ARCHITECTURE.md, pure `examples/il.ts`, unit tests
+- [x] spec.yaml, ARCHITECTURE.md, pure `src/il.ts`, unit tests
 - [x] Anti-patterns, edge cases, portability, offline demo
 - [x] Related blueprints
 
