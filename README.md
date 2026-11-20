@@ -1,11 +1,12 @@
 # wax-impermanent-loss-insurance-pool-tracker
 
 **Trust label:** `educational-reference`  
-**Status:** Private. The full-range formula and the insurance overlay are tested offline.
+**Status:** The course is [EDUCATION.md](EDUCATION.md). `npm test` locks the float sketch and the paper policy. This is not the integer IL lab, not Alcor, and not financial advice.  
+**Catalog:** `wax-ecosystem-blueprint-catalog` (private index; not this public course)
 
 One-sentence goal: show how a constant-product liquidity position compares with simply holding, and how a paper insurance policy changes that gap.
 
-Parent catalog: [pixel-journey/wax-ecosystem-blueprint-catalog](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog)
+Parent catalog: `wax-ecosystem-blueprint-catalog` (private index; not this public course)
 
 ## Quick start
 
